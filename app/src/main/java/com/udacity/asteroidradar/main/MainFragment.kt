@@ -3,6 +3,7 @@ package com.udacity.asteroidradar.main
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.udacity.asteroidradar.R
@@ -26,6 +27,10 @@ class MainFragment : Fragment() {
         })
 
         binding.asteroidRecycler.adapter = adapter
+
+        viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
+            adapter.submitList(it)
+        })
 
         setHasOptionsMenu(true)
 

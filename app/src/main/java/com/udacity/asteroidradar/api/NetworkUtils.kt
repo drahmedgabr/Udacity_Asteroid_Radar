@@ -1,11 +1,36 @@
 package com.udacity.asteroidradar.api
 
+
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
 import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+
+private val retrofit = Retrofit.Builder().addConverterFactory(ScalarsConverterFactory.create()).baseUrl(
+    Constants.BASE_URL).build()
+
+
+interface AsteroidApiService {
+
+    @GET("neo/rest/v1/feed")
+    suspend fun getAsteroidData(@Query("start_date") startDate: String,
+                              @Query("end_date") endDate: String,
+                              @Query("api_key") key: String): String
+}
+
+object AsteroidApi {
+    val asteroidApiService: AsteroidApiService by lazy {
+        retrofit.create(AsteroidApiService::class.java)
+    }
+}
+
+
 
 fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
     val nearEarthObjectsJson = jsonResult.getJSONObject("near_earth_objects")
