@@ -54,7 +54,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/asteroid_date_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/asteroid_name_text"
-            app:srcCompat="@drawable/ic_status_normal"
+            getIconStatus="@{asteroid.potentiallyHazardous}"
             tools:srcCompat="@drawable/ic_status_normal" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
