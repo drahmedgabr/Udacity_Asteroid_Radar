@@ -2,6 +2,7 @@ package com.udacity.asteroidradar.main
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.udacity.asteroidradar.Asteroid
@@ -19,6 +20,11 @@ class MainViewModel(val database: AsteroidDatabaseDao) : ViewModel() {
     val asteroidList: LiveData<List<Asteroid>>
         get() = database.getAllData()
 
+    private val _dailyImage = MutableLiveData<DailyImage>()
+
+    val dailyImage: LiveData<DailyImage>
+    get() = _dailyImage
+
 
     init {
         getData()
@@ -35,6 +41,7 @@ class MainViewModel(val database: AsteroidDatabaseDao) : ViewModel() {
                 val jsonObject = JSONObject(dataString)
                 val data = parseAsteroidsJsonResult(jsonObject)
                 database.updateData(data)
+                _dailyImage.value = AsteroidApi.asteroidApiService.getDailyImage(Constants.API_KEY)
             } catch (e: Exception) {
                 Log.e("MainVM", e.toString())
             }
