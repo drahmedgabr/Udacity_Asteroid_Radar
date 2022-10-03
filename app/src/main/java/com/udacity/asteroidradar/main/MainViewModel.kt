@@ -15,9 +15,11 @@ import java.util.*
 class MainViewModel(val database: AsteroidDatabaseDao) :
     ViewModel() {
 
-    private val _offlineList = database.getAllData()
+    private val _offlineList = database.getAllData(TaskDates.startDate())
 
     private val _asteroidList = MutableLiveData<List<Asteroid>>()
+
+    private val _todayAsteroid = MutableLiveData<List<Asteroid>>()
 
     val asteroidList = MediatorLiveData<List<Asteroid>>()
 
@@ -65,6 +67,7 @@ class MainViewModel(val database: AsteroidDatabaseDao) :
     private fun addSource(list: LiveData<List<Asteroid>>) {
         asteroidList.removeSource(_offlineList)
         asteroidList.removeSource(_asteroidList)
+        asteroidList.removeSource(_todayAsteroid)
         asteroidList.addSource(list) {
             asteroidList.value = it
         }
@@ -77,20 +80,26 @@ class MainViewModel(val database: AsteroidDatabaseDao) :
     fun showOnlineData() {
         addSource(_asteroidList)
     }
+
+    fun showTodayData() {
+        _todayAsteroid.value = _asteroidList.value?.filter {
+            it.closeApproachDate == TaskDates.startDate()
+        }
+        addSource(_todayAsteroid)
+    }
 }
 
 class TaskDates {
-
     companion object {
-        val calendar = Calendar.getInstance()
         val formatter = SimpleDateFormat("yyyy-MM-dd")
 
         fun startDate(): String {
-            val start = calendar.time
+            val start = Calendar.getInstance().time
             return formatter.format(start)
         }
 
         fun endDate(): String {
+            val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, 7)
             val end = calendar.time
             return formatter.format(end)

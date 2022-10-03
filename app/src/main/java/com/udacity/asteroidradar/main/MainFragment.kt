@@ -62,8 +62,8 @@ class MainFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.show_buy_menu -> viewModel.showOfflineData()
+            R.id.show_rent_menu -> viewModel.showTodayData()
             else -> viewModel.showOnlineData()
-
         }
         return true
     }
