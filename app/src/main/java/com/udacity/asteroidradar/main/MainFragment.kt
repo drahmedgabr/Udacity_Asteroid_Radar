@@ -5,7 +5,6 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.database.AsteroidDatabase
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
@@ -34,6 +33,14 @@ class MainFragment : Fragment() {
 
         viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
             adapter.submitList(it)
+        })
+
+        viewModel.connectionStatus.observe(viewLifecycleOwner, Observer {
+            if(it){
+                binding.statusLoadingWheel.visibility = View.VISIBLE
+            } else {
+                binding.statusLoadingWheel.visibility = View.GONE
+            }
         })
 
         setHasOptionsMenu(true)
