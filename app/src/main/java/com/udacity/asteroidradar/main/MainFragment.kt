@@ -18,8 +18,10 @@ class MainFragment : Fragment() {
         ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val binding = FragmentMainBinding.inflate(inflater)
         binding.lifecycleOwner = this
 
@@ -32,21 +34,25 @@ class MainFragment : Fragment() {
         binding.asteroidRecycler.adapter = adapter
 
         viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
-            adapter.submitList(it)
+            it?.let {
+                adapter.submitList(it)
+            }
         })
 
         viewModel.connectionStatus.observe(viewLifecycleOwner, Observer {
-            if(it){
+            if (it) {
                 binding.statusLoadingWheel.visibility = View.VISIBLE
             } else {
                 binding.statusLoadingWheel.visibility = View.GONE
             }
         })
 
+
         setHasOptionsMenu(true)
 
         return binding.root
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_overflow_menu, menu)
@@ -54,6 +60,11 @@ class MainFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.show_buy_menu -> viewModel.showOfflineData()
+            else -> viewModel.showOnlineData()
+
+        }
         return true
     }
 }

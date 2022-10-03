@@ -1,15 +1,9 @@
 package com.udacity.asteroidradar.main
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
-import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.api.AsteroidApi
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDatabaseDao
@@ -18,15 +12,14 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainViewModel(val database: AsteroidDatabaseDao) : ViewModel() {
+class MainViewModel(val database: AsteroidDatabaseDao) :
+    ViewModel() {
+
+    private val _offlineList = database.getAllData()
 
     private val _asteroidList = MutableLiveData<List<Asteroid>>()
 
-    val asteroidList: LiveData<List<Asteroid>>
-        get() = _asteroidList
-
-    private val _offlineList: LiveData<List<Asteroid>>
-    get() = database.getAllData()
+    val asteroidList = MediatorLiveData<List<Asteroid>>()
 
     private val _connectionStatus = MutableLiveData<Boolean>()
 
@@ -43,6 +36,7 @@ class MainViewModel(val database: AsteroidDatabaseDao) : ViewModel() {
         getData()
     }
 
+
     fun getData() {
         _connectionStatus.value = true
         viewModelScope.launch {
@@ -53,24 +47,36 @@ class MainViewModel(val database: AsteroidDatabaseDao) : ViewModel() {
                     Constants.API_KEY
                 )
                 val jsonObject = JSONObject(dataString)
-                val data = parseAsteroidsJsonResult(jsonObject)
+                val data: List<Asteroid> = parseAsteroidsJsonResult(jsonObject)
                 database.updateData(data)
                 _asteroidList.value = data
+                showOnlineData()
                 _connectionStatus.value = false
                 _dailyImage.value = AsteroidApi.asteroidApiService.getDailyImage(Constants.API_KEY)
             } catch (e: Exception) {
-                getOfflineData()
+                showOfflineData()
+                _connectionStatus.value = false
                 Log.e("MainVM", e.toString())
             }
         }
     }
 
-    fun getOfflineData() {
-        _connectionStatus.value = true
-        _asteroidList.value = _offlineList.value
-        _connectionStatus.value = false
+
+    private fun addSource(list: LiveData<List<Asteroid>>) {
+        asteroidList.removeSource(_offlineList)
+        asteroidList.removeSource(_asteroidList)
+        asteroidList.addSource(list) {
+            asteroidList.value = it
+        }
     }
 
+    fun showOfflineData() {
+        addSource(_offlineList)
+    }
+
+    fun showOnlineData() {
+        addSource(_asteroidList)
+    }
 }
 
 class TaskDates {
