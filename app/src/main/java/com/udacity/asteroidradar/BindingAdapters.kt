@@ -11,10 +11,10 @@ fun bindImageViewAsteroiStatus(imageView: ImageView, isHazardous: Boolean){
     val context = imageView.context
     if(isHazardous){
         imageView.setImageResource(R.drawable.ic_status_potentially_hazardous)
-        imageView.contentDescription = context.getString(R.string.potentially_hazardous_asteroid_image)
+        imageView.contentDescription = context.getString(R.string.hazard_status_icon)
     } else {
         imageView.setImageResource(R.drawable.ic_status_normal)
-        imageView.contentDescription = context.getString(R.string.not_hazardous_asteroid_image)
+        imageView.contentDescription = context.getString(R.string.not_hazard_status_icon)
     }
 }
 
@@ -22,11 +22,12 @@ fun bindImageViewAsteroiStatus(imageView: ImageView, isHazardous: Boolean){
 @BindingAdapter("imageOfDay")
 fun bindImageOfDay(imageView: ImageView, dailyImage: DailyImage?){
     dailyImage?.let {
+        val context = imageView.context
+        imageView.contentDescription = context.getString(R.string.this_is_nasa_s_picture_of_day_showing_nothing_yet)
         if(dailyImage.media_type == "image"){
             Picasso.get().load(dailyImage.url).into(imageView);
             imageView.contentDescription = dailyImage.title
         } else {
-            val context = imageView.context
             imageView.setImageResource(R.drawable.sample_daily_image)
             imageView.contentDescription = context.getString(R.string.sample_daily_image)
         }
@@ -35,10 +36,13 @@ fun bindImageOfDay(imageView: ImageView, dailyImage: DailyImage?){
 
 @BindingAdapter("asteroidStatusImage")
 fun bindDetailsStatusImage(imageView: ImageView, isHazardous: Boolean) {
+    val context = imageView.context
     if (isHazardous) {
         imageView.setImageResource(R.drawable.asteroid_hazardous)
+        imageView.contentDescription = context.getString(R.string.potentially_hazardous_asteroid_image)
     } else {
         imageView.setImageResource(R.drawable.asteroid_safe)
+        imageView.contentDescription = context.getString(R.string.not_hazardous_asteroid_image)
     }
 }
 

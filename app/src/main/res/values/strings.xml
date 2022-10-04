@@ -21,4 +21,6 @@
     <string name="nasa_picture_of_day_content_description_format">NASA\'s picture of day: %s</string>
     <string name="sample_daily_image">Offline sample of NASA\'s picture of day</string>
     <string name="show_offline_data">Showing offline data</string>
+    <string name="hazard_status_icon">Potentially hazardous asteroid status icon</string>
+    <string name="not_hazard_status_icon">Not hazardus asteroid status icon</string>
 </resources>
