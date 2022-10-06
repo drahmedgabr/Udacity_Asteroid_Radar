@@ -8,10 +8,11 @@ import com.udacity.asteroidradar.api.AsteroidApi
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDatabaseDao
 import com.udacity.asteroidradar.main.DailyImage
-import com.udacity.asteroidradar.main.TaskDates
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AsteroidRepo(val database: AsteroidDatabaseDao) {
 
@@ -20,7 +21,7 @@ class AsteroidRepo(val database: AsteroidDatabaseDao) {
     val asteroids: LiveData<List<Asteroid>>
         get() = _asteroids
 
-    val offlineList = database.getAllData(TaskDates.startDate())
+    val offlineList = database.getAllData(TaskDates.todayDate())
 
     private val _todayList = MutableLiveData<List<Asteroid>>()
 
@@ -31,23 +32,47 @@ class AsteroidRepo(val database: AsteroidDatabaseDao) {
 
 
     suspend fun refreshData() {
-
         val dataString = AsteroidApi.asteroidApiService.getAsteroidData(
-            TaskDates.startDate(),
+            TaskDates.todayDate(),
             TaskDates.endDate(),
             Constants.API_KEY
         )
         val jsonObject = JSONObject(dataString)
         val data: List<Asteroid> = parseAsteroidsJsonResult(jsonObject)
         _asteroids.value = data
-        val todayImage = AsteroidApi.asteroidApiService.getDailyImage(Constants.API_KEY)
-        dailyImage.value = todayImage
-        _todayList.value = asteroids.value?.filter {
-            it.closeApproachDate == TaskDates.startDate()
-        }
         withContext(Dispatchers.IO) {
-            database.updateData(data)
+            database.insert(data)
         }
     }
 
+    suspend fun getTodayItems() {
+        val todayImage = AsteroidApi.asteroidApiService.getDailyImage(Constants.API_KEY)
+        dailyImage.value = todayImage
+        _todayList.value = asteroids.value?.filter {
+            it.closeApproachDate == TaskDates.todayDate()
+        }
+    }
+
+    suspend fun deleteOdlData() {
+        database.deleteOldData(TaskDates.todayDate())
+    }
+
+}
+
+class TaskDates {
+    companion object {
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+
+        fun todayDate(): String {
+            val start = Calendar.getInstance().time
+            return formatter.format(start)
+        }
+
+        fun endDate(): String {
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_YEAR, 7)
+            val end = calendar.time
+            return formatter.format(end)
+        }
+    }
 }

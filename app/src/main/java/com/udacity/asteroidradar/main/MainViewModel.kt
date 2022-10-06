@@ -33,6 +33,7 @@ class MainViewModel(val database: AsteroidDatabaseDao) :
         viewModelScope.launch {
             try {
                 repo.refreshData()
+                repo.getTodayItems()
                 showOnlineData()
                 _connectionStatus.value = false
             } catch (e: Exception) {
@@ -62,23 +63,5 @@ class MainViewModel(val database: AsteroidDatabaseDao) :
 
     fun showTodayData() {
         addSource(repo.todayList)
-    }
-}
-
-class TaskDates {
-    companion object {
-        val formatter = SimpleDateFormat("yyyy-MM-dd")
-
-        fun startDate(): String {
-            val start = Calendar.getInstance().time
-            return formatter.format(start)
-        }
-
-        fun endDate(): String {
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, 7)
-            val end = calendar.time
-            return formatter.format(end)
-        }
     }
 }
